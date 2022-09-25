@@ -4,7 +4,7 @@ def scrape_data(maxrows=100, filename='funds_100.csv'):
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver import ActionChains
-    from selenium.webdriver import TouchActions
+#    from selenium.webdriver import TouchActions
     from selenium.webdriver.support import expected_conditions as ec
     from bs4 import BeautifulSoup
     import csv
@@ -13,19 +13,19 @@ def scrape_data(maxrows=100, filename='funds_100.csv'):
 
     def grab_tab(tag, tab):
         print("Looking for %s tab: %s" % (tag, tab))
-        tab_element = driver.find_element_by_id(tab)
+        tab_element = driver.find_element(By.ID,tab)
         tab_actions = ActionChains(driver)
         tab_actions.move_to_element(tab_element)
         tab_actions.click()
         tab_actions.perform()
-        tab_actions = TouchActions(driver)
-        tab_actions.tap(tab_element)
-        tab_actions.perform()
+#        tab_actions = TouchActions(driver)
+#        tab_actions.tap(tab_element)
+#        tab_actions.perform()
         return driver.page_source
 
     url_core = "https://www.fidelity.co.uk/investing/investment-finder#?investmentType=funds"
     url_params1 = "&filtersSelectedValue=%7B%7D&sortField=legalName&sortOrder=asc"
-    url_params2 = "subUniverseId=MFEI&universeId=FOGBR$$ALL_3521"
+    url_params2 = "&subUniverseId=MFEI&universeId=FOGBR$$ALL_3521"
 
     if maxrows > 100:
         pagerows = 500
@@ -37,18 +37,8 @@ def scrape_data(maxrows=100, filename='funds_100.csv'):
     driver.set_page_load_timeout(120)
     driver.get(url_core + "&page=1&perPage=10" + url_params1 + url_params2)
     print("  GET completed, waiting for presence of Cookie")
-    try:
-        WebDriverWait(driver, 20).until(
-            ec.presence_of_element_located((By.ID, "cookieMgn"))
-        )
-    finally:
-        print("  Waiting for cookie to go...")
-        try:
-            WebDriverWait(driver, 20).until(
-                ec.invisibility_of_element_located((By.ID, "cookieMgn"))
-            )
-        finally:
-            cookieC = driver.find_element_by_id("cookieMgn")
+    WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "ensCloseBanner"))).click()
+    print("  ... Cookies accepted")
 
     fund_containers = []
     overview_containers = []
